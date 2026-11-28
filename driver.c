@@ -52,6 +52,18 @@ char* genExecName(char *passedFilename) {
     return processedFilename;
 }
 
+int runPreProcessor(char *passedInFilename, char *passedOutFilename) {
+    if(!passedInFilename || !passedOutFilename) {
+        return NULL;
+    }
+
+    size_t total_len = strlen(passedInFilename) + strlen(passedOutFilename) + 1;
+    char command[total_len];
+    snprintf(command, sizeof(command), "gcc -E -P %s -o %s\0", passedInFilename, passedOutFilename);
+
+    return system(command);
+}
+
 int main(int argc, char *argv[]) {
 
     // CURRENT ASSUMPTION: [0] = command, [1] = filename param, [2] = first flag.
@@ -70,6 +82,9 @@ int main(int argc, char *argv[]) {
     const char *preprocessedFilename = genPpName(filename); // The function first needs the address, then dereferences ONCE IT HAS IT.
     const char *assemblyFilename = genAsmName(filename);
     const char *executableFilename = genExecName(filename); 
+
+    int returnCode = runPreProcessor(filename, preprocessedFilename); // returns exit codes for main to use.
+    // TODO: add reaction to returned result.
 
     // handle compilation steps
     if(strcmp(*firstflag, "--lex") == 0) {
