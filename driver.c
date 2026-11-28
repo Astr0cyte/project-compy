@@ -1,5 +1,56 @@
 // a command line program that accepts a path to a C source file as its only argument.
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+char* genPpName(char *passedFilename) {
+    char *container = passedFilename; // container now points the address of first char of filename.
+
+    char *dot = strrchr(passedFilename, '.'); // points to the address of the LAST INSTANCE OF a dot (last instance = defined strrchr behaviour).
+    size_t characters = dot - passedFilename; // 'dot' is at a higher address (thus a bigger number). Size_t was recommended by Claude as it is standard practice.
+
+    char *processedFilename = (char *) malloc(characters + 3);
+    memcpy(processedFilename, passedFilename, characters);
+
+    // Add preprocessed file extension & null byte.
+    processedFilename[characters - 2] = '.';
+    processedFilename[characters - 1] = 'i';
+    processedFilename[characters] = '\0';
+
+    return processedFilename;
+}
+
+char* genAsmName(char *passedFilename) {
+    char *container = passedFilename; // container now points the address of first char of filename.
+
+    char *dot = strrchr(passedFilename, '.'); // points to the address of the LAST INSTANCE OF a dot (last instance = defined strrchr behaviour).
+    size_t characters = dot - passedFilename; // 'dot' is at a higher address (thus a bigger number). Size_t was recommended by Claude as it is standard practice.
+
+    char *processedFilename = (char *) malloc(characters + 3);
+    memcpy(processedFilename, passedFilename, characters);
+
+    // Add assembly file extension & null byte.
+    processedFilename[characters - 2] = '.';
+    processedFilename[characters - 1] = 's';
+    processedFilename[characters] = '\0';
+
+    return processedFilename;
+}
+
+char* genExecName(char *passedFilename) {
+    char *container = passedFilename; // container now points the address of first char of filename.
+
+    char *dot = strrchr(passedFilename, '.'); // points to the address of the LAST INSTANCE OF a dot (last instance = defined strrchr behaviour).
+    size_t characters = dot - passedFilename; // 'dot' is at a higher address (thus a bigger number). Size_t was recommended by Claude as it is standard practice.
+
+    char *processedFilename = (char *) malloc(characters + 1);
+    memcpy(processedFilename, passedFilename, characters);
+
+    // Add null byte.
+    processedFilename[characters] = '\0';
+
+    return processedFilename;
+}
 
 int main(int argc, char *argv[]) {
 
@@ -8,14 +59,17 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: %s, <file_name>\n", argv[0]);
         return 1;
     } 
-
-    const char *filename = argv[1];
-    const char *firstflag = argv[2];
+    
+    // argv is an array of addresses.
+    // declaration and execution. "Declaration with an initialiser".
+    // Execution: writing the address stored in argv[1] into the 8-byte pointer variable.
+    const char *filename = argv[1];  // Not an ordinary char. This is a char pointer!
+    const char *firstflag = argv[2]; 
 
     // Handle building all filenames from outset
-    const char preprocessedFilename = genPpName(*filename);
-    const char assemblyFilename = genAsmName(*filename);
-    const char executableFilename = genExecName(*filename);
+    const char *preprocessedFilename = genPpName(filename); // The function first needs the address, then dereferences ONCE IT HAS IT.
+    const char *assemblyFilename = genAsmName(filename);
+    const char *executableFilename = genExecName(filename); 
 
     // handle compilation steps
     if(strcmp(*firstflag, "--lex") == 0) {
@@ -27,58 +81,7 @@ int main(int argc, char *argv[]) {
     } else {
 
     }
-
 }
 
 
-char genPpName(char *passedFilename) {
-    char container = passedFilename; // Make a copy - do not modify O.G.
-    char processedFilename;
 
-    char dot = strrchr(passedFilename, '.');
-    char *characters = dot - *passedFilename; // why do we subtract dot - filename? AI suggested this. My hunch is how memory works: I think we are subtracting addresses here. I think 'dot' would be at a higher address (thus a bigger number).
-
-    processedFilename = malloc(characters + 3);
-    memcpy(processedFilename, passedFilename, characters);
-
-    // Add preprocessed file extension & null byte.
-    processedFilename[characters - 2] = '.';
-    processedFilename[characters - 1] = 'i';
-    processedFilename[characters] = '\0';
-
-    return processedFilename;
-}
-
-char genAsmName(char *passedFilename) {
-    char container = passedFilename;
-    char processedFilename;
-
-    char dot = strrchr(passedFilename, '.');
-    char *characters = dot - *passedFilename; 
-
-    processedFilename = malloc(characters + 3);
-    memcpy(processedFilename, passedFilename, characters);
-
-    // Add assembly file extension & null byte.
-    processedFilename[characters - 2] = '.';
-    processedFilename[characters - 1] = 's';
-    processedFilename[characters] = '\0';
-
-    return processedFilename;
-}
-
-char genExecName(char *passedFilename) {
-    char container = passedFilename; 
-    char processedFilename;
-
-    char dot = strrchr(passedFilename, '.');
-    char *characters = dot - *passedFilename; 
-
-    processedFilename = malloc(characters + 1);
-    memcpy(processedFilename, passedFilename, characters);
-
-    // Add null byte.
-    processedFilename[characters] = '\0';
-
-    return processedFilename;
-}
